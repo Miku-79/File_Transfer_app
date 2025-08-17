@@ -1,13 +1,18 @@
+package backend;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class httpServer {
+public class JavaHttpServer {
     public static void main(String[] args) throws IOException {
         SetHttpServer();
     }
@@ -16,7 +21,7 @@ public class httpServer {
         HttpServer server = HttpServer.create(new InetSocketAddress(8080),0);
         
         server.createContext("/API", new APIHandler());
-        server.createContext("/", new StaticFileHandler("../web"));
+        server.createContext("/", new StaticFileHandler("web"));
         server.createContext("/status", exchange -> {
             String response = "Java backend is running";
             exchange.sendResponseHeaders(200,response.length());
@@ -69,6 +74,7 @@ public class httpServer {
 
                 } else {
                         String notFound = "404 Not Found";
+                        System.out.println(filepth);
                         exchange.sendResponseHeaders(404, notFound.length());
                         try (OutputStream os = exchange.getResponseBody()) {
                             os.write(notFound.getBytes());
@@ -94,22 +100,49 @@ public class httpServer {
             String path = exchange.getRequestURI().getPath();
 
             switch (path) {
-                case "API/Recive":
-                    
-                    
-
+                case "/API/Recive":
+                    ReciveAPI();
                     break;
                 
-                case "API/Send":
-
+                case "/API/Send":
+                    SendAPI();
                     break;
 
+                case "/API/Getinfo":
+                    Sendinfo(exchange);
                 default:
                     break;
             }
         }
 
-        
+        public void ReciveAPI() throws SocketException, UnknownHostException, IOException{
+            FileTransfer ReciveObj = new FileTransfer();
+            ReciveObj.RespondUDP();
+            
+            ServerSocket recevesoc = new ServerSocket(ReciveObj.port);
+            Socket clientSocket = recevesoc.accept();
+
+            String Response = ReciveObj.recivemetadat(ReciveObj.port, recevesoc);
+
+            if (Response != null){
+                ReciveObj.recevefile(Response,clientSocket);
+            }
+        }
+
+        public void SendAPI() throws SocketException, UnknownHostException, IOException{
+            FileTransfer SendObj = new FileTransfer();
+            SendObj.FindWaitingClients();
+        }
+
+        public void Sendinfo(HttpExchange exchange) throws IOException{
+            String configJson = ConfigManager.getinJSON();
+            System.out.println(configJson);
+            exchange.sendResponseHeaders(200, configJson.length());
+            
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(configJson.getBytes());
+            }
+        }
     }
 
 }

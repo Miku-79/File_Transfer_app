@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="./assets/IconCss/all.min.css">
+
 </head>
 <body>
     
@@ -21,10 +23,14 @@
     <section class="main">
         <div class="content-panel">
             <div id="send-panel" class="panel">
-                <h1>this is send panel</h1>
+                <div class="top_bar">
+                    <label for="filePicker" class="custom-file-upload"><i class="fa-solid fa-file"></i></label>
+                    <label for="filePicker" class="custom-file-upload"><i class="fa-solid fa-file"></i></label>
+                    <input type="file" id="filePicker">
+                </div>
             </div>
             <div id="Recive-panel" class="panel active">
-                <img src="./assets/logo.png" alt="logo">
+                    <img src="./assets/logo.png" alt="logo">
             </div>
             <div id="setting-panel" class="panel">
                 <h1>this is setting panel</h1>
@@ -39,6 +45,6 @@
         <div class="progress-panel">C</div>
     </section>
 
-    <script src="./script.js"></script>
+    <script type="module" src="./script.js"></script>
 </body>
 </html>

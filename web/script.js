@@ -1,8 +1,10 @@
+import * as API from "./ApiCaller.js"
+
 const hamburger_element = document.querySelector(".hamburger");
 let isopened = false;
 hamburger_element.addEventListener("click", ()=>{
     if(isopened){
-        document.querySelector(".menu").style.transform = "translateX(90%)";
+        document.querySelector(".menu").style.transform = "translateX(88%)";
         hamburger_element.style.transform = "translateY(0px) rotate(0deg)";
         isopened = false;
     }else{
@@ -31,15 +33,12 @@ function showpanel(index) {
           break;
         case 1:
           document.getElementById("Recive-panel").classList.add("active");
+
+
           break;
         default:
           document.getElementById("setting-panel").classList.add("active");
       }
 }
 
-console.log("Script loaded")
-fetch('http://localhost:8080/status')
-    .then(res => res.text())
-    .then(data => {
-        console.log("Backend says:",data);
-    })
+API.getinfo();

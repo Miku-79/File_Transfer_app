@@ -1,3 +1,4 @@
+package backend;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
@@ -28,36 +29,11 @@ import java.util.Scanner;
 
 public class FileTransfer {
 
+    Config cfg = ConfigManager.getconfig();
+
     final int buffersize = 64*1024;
-    int port = 50000;
+    int port = cfg.port;
     String IP = FindMachineIPAddress().getHostAddress();
-
-    public static void main(String[] args) throws SocketException, UnknownHostException, IOException {
-        FileTransfer model = new FileTransfer(); 
-        
-        model.FindWaitingClients();
-        System.out.println(FindMachineIPAddress().getHostAddress());
-            // Path srcPath = Path.of(filesrc);
-            // String hostip;
-            // int port;
-
-            // model.sendmetadata(srcPath, hostip, port);
-            // model.transferfile(srcPath, hostip, port);
-        
-
-            // Path destPath = Path.of(destpath);
-            
-            // boolean result = model.recivemetadat(port);
-
-            // try (ServerSocket recevesoc = new ServerSocket(port);) {
-
-            //     Socket clientSocket = recevesoc.accept();
-            //     boolean success = model.recevefile(destPath, clientSocket);
-                
-            // } catch (Exception e) {
-            //     System.out.println("Error Occured: "+e.getMessage());
-            // }
-    }    
 
     public static InetAddress FindMachineIPAddress(){
 
@@ -176,14 +152,14 @@ public class FileTransfer {
         }
     }
 
-    public boolean recivemetadat(int port){
-        try(ServerSocket serversoc = new ServerSocket(port);
-            Socket sendersoc = serversoc.accept();
+    public String recivemetadat(int port, ServerSocket serversoc){
+        try(Socket sendersoc = serversoc.accept();
             DataInputStream datain = new DataInputStream(new BufferedInputStream(sendersoc.getInputStream()));
             DataOutputStream ackOut = new DataOutputStream(sendersoc.getOutputStream());) 
         {
+            String Filename = datain.readUTF();
             System.out.println("Receving metadata");
-            System.out.println("Filename: "+datain.readUTF());
+            System.out.println("Filename: "+Filename);
             System.out.println("File Size: "+ (datain.readLong()/1048576) +" MB");
             
             Scanner scanner = new Scanner(System.in);
@@ -197,16 +173,18 @@ public class FileTransfer {
             }
             ackOut.writeUTF("READY");
             ackOut.flush();
-            return true;
+            return Filename;
         
         } catch (Exception e) {
             System.out.println("Error Occured ReciveingMetadata : "+e.getMessage());
-            return false;
+            return null;
         }
     }
 
-    public boolean recevefile(Path filesrc , Socket sendersoc){
+    public boolean recevefile(String filename , Socket sendersoc){
 
+        String DEFAULT_PATH = "."; 
+        Path filesrc = Path.of(DEFAULT_PATH,filename);
         try (ReadableByteChannel readchannel = Channels.newChannel(sendersoc.getInputStream());
             FileChannel writeChannel = FileChannel.open(filesrc, StandardOpenOption.WRITE, StandardOpenOption.CREATE))    
         {
